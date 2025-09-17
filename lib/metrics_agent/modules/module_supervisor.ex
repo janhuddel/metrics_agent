@@ -15,7 +15,7 @@ defmodule MetricsAgent.Modules.ModuleSupervisor do
     Logger.info("Starting module supervisor")
 
     # Create children for enabled modules
-    children = [{MetricsAgent.Modules.Demo.Demo, []}]
+    children = [{MetricsAgent.Modules.Tasmota.Tasmota, []}]
 
     # One-for-one strategy: if one module crashes, only restart that one
     Supervisor.init(children, strategy: :one_for_one)

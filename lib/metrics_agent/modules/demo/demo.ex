@@ -16,6 +16,7 @@ defmodule MetricsAgent.Modules.Demo.Demo do
 
     config = Application.get_env(:metrics_agent, :demo)
     interval = config[:interval] || 5000
+    vendor = config[:vendor] || "unknown"
 
     # Schedule first metric collection
     Process.send_after(self(), :collect_metrics, interval)
@@ -24,6 +25,7 @@ defmodule MetricsAgent.Modules.Demo.Demo do
      %{
        config: config,
        interval: interval,
+       vendor: vendor,
        counter: 0
      }}
   end
@@ -38,7 +40,7 @@ defmodule MetricsAgent.Modules.Demo.Demo do
     end
 
     # Generate demo metrics
-    metrics = generate_demo_metrics(state.counter)
+    metrics = generate_demo_metrics(state.counter, state.vendor)
 
     # Send metrics to collector
     Enum.each(metrics, &MetricsAgent.MetricsCollector.send_metric/1)
@@ -59,31 +61,31 @@ defmodule MetricsAgent.Modules.Demo.Demo do
 
   # Private functions
 
-  defp generate_demo_metrics(counter) do
+  defp generate_demo_metrics(counter, vendor) do
     timestamp = System.system_time(:nanosecond)
 
     [
       %{
         name: "demo_counter",
-        tags: %{module: "demo"},
+        tags: %{module: "demo", vendor: vendor},
         fields: %{value: counter},
         timestamp: timestamp
       },
       %{
         name: "demo_temperature",
-        tags: %{module: "demo", sensor: "sensor1"},
+        tags: %{module: "demo", sensor: "sensor1", vendor: vendor},
         fields: %{temperature: 20.0 + :rand.uniform() * 10.0},
         timestamp: timestamp
       },
       %{
         name: "demo_humidity",
-        tags: %{module: "demo", sensor: "sensor1"},
+        tags: %{module: "demo", sensor: "sensor1", vendor: vendor},
         fields: %{humidity: 40.0 + :rand.uniform() * 20.0},
         timestamp: timestamp
       },
       %{
         name: "demo_pressure",
-        tags: %{module: "demo", sensor: "sensor1"},
+        tags: %{module: "demo", sensor: "sensor1", vendor: vendor},
         fields: %{pressure: 1013.25 + :rand.uniform() * 10.0},
         timestamp: timestamp
       }

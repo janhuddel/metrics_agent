@@ -1,0 +1,74 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug Elixir Application",
+      "type": "mix_task",
+      "request": "launch",
+      "projectDir": "${workspaceFolder}",
+      "task": "run",
+      "taskArgs": ["--no-halt"],
+      "exitAfterTaskReturns": false,
+      "env": {
+        "MIX_ENV": "dev"
+      }
+    },
+    {
+      "name": "Debug with IEx",
+      "type": "mix_task",
+      "request": "launch",
+      "projectDir": "${workspaceFolder}",
+      "task": "run",
+      "taskArgs": ["-S", "iex", "--no-halt"],
+      "env": {
+        "MIX_ENV": "dev"
+      }
+    },
+    {
+      "name": "Debug Tests",
+      "type": "mix_task",
+      "request": "launch",
+      "projectDir": "${workspaceFolder}",
+      "task": "test",
+      "env": {
+        "MIX_ENV": "test"
+      }
+    },
+    {
+      "name": "Debug Specific Test",
+      "type": "mix_task",
+      "request": "launch",
+      "projectDir": "${workspaceFolder}",
+      "task": "test",
+      "taskArgs": ["${input:testFile}"],
+      "env": {
+        "MIX_ENV": "test"
+      }
+    },
+    {
+      "name": "Debug with Custom Args",
+      "type": "mix_task",
+      "request": "launch",
+      "projectDir": "${workspaceFolder}",
+      "task": "run",
+      "taskArgs": ["${input:customArgs}"],
+      "env": {
+        "MIX_ENV": "dev"
+      }
+    }
+  ],
+  "inputs": [
+    {
+      "id": "testFile",
+      "description": "Test file to run (e.g., test/metrics_agent_test.exs)",
+      "default": "test/metrics_agent_test.exs",
+      "type": "promptString"
+    },
+    {
+      "id": "customArgs",
+      "description": "Custom arguments to pass to mix run",
+      "default": "--no-halt",
+      "type": "promptString"
+    }
+  ]
+}

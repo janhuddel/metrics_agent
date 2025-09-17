@@ -8,6 +8,9 @@
 
 import Config
 
+config :logger,
+  level: :debug
+
 config :logger, :default_handler,
   config: [
     type: :standard_error
@@ -16,3 +19,12 @@ config :logger, :default_handler,
 config :logger, :default_formatter,
   format: "$date $time [$level] [$metadata] $message\n",
   metadata: [:module]
+
+config :metrics_agent, :demo,
+  interval: 1000,
+  vendor: "demo"
+
+config :metrics_agent, :tasmota,
+  mqtt_host: "mqtt.intra.rohwer.sh",
+  mqtt_port: 1883,
+  discovery_topic: "tasmota/discovery/+/config"
