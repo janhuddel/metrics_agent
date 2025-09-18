@@ -7,20 +7,20 @@ defmodule MetricsAgent.MixProject do
       version: "0.1.0",
       elixir: "~> 1.17",
       start_permanent: Mix.env() == :prod,
-      deps: deps(),
-      releases: [
-        metrics_agent: [
-          steps: [:assemble, &Burrito.wrap/1],
-          burrito: [
-            targets: [
-              linux: [
-                os: :linux,
-                cpu: :x86_64
-              ]
-            ]
-          ]
-        ]
-      ]
+      deps: deps()
+      # releases: [
+      #  metrics_agent: [
+      #    steps: [:assemble, &Burrito.wrap/1],
+      #    burrito: [
+      #      targets: [
+      #        linux: [
+      #          os: :linux,
+      #          cpu: :x86_64
+      #        ]
+      #      ]
+      #    ]
+      #  ]
+      # ]
     ]
   end
 
@@ -35,7 +35,7 @@ defmodule MetricsAgent.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:burrito, "~> 1.4"},
+      # {:burrito, "~> 1.4"},
 
       # JSON handling
       {:jason, "~> 1.4"},
