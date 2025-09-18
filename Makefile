@@ -38,11 +38,7 @@ release: test ## Create a release
 
 release-tarball: release ## Create a release tarball for distribution
 	mkdir -p ./_build/release-tarballs
-	# Create scripts directory and copy wrapper script to release directory
-	mkdir -p _build/prod/rel/metrics_agent/scripts
-	cp scripts/start.sh _build/prod/rel/metrics_agent/scripts/
-	chmod +x _build/prod/rel/metrics_agent/scripts/start.sh
-	# Create tarball with both release and wrapper script
+	# Create tarball with release
 	tar -czf ./_build/release-tarballs/metrics_agent.tar.gz -C _build/prod/rel metrics_agent
 	@echo "Release tarball created: metrics_agent.tar.gz"
 

@@ -205,7 +205,7 @@ main() {
     log "2. Add the Telegraf configuration to your telegraf.conf:"
     log ""
     log "[[inputs.execd]]"
-    log "  command = [\"/opt/metrics-agent/scripts/start.sh\"]"
+    log "  command = [\"/opt/metrics-agent/bin/metrics_agent\", \"start\"]"
     log "  signal = \"STDIN\""
     log "  restart_delay = \"10s\""
     log "  data_format = \"influx\""
