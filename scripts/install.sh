@@ -51,21 +51,25 @@ get_latest_release() {
     # Check if the API call was successful
     if [[ "$http_code" != "200" ]]; then
         if [[ "$http_code" == "404" ]]; then
-            error "No releases found for repository ${REPO_OWNER}/${REPO_NAME}. Please create a release first."
+            echo "No releases found for repository ${REPO_OWNER}/${REPO_NAME}. Please create a release first." >&2
+            return 1
         else
-            error "Failed to fetch releases from GitHub API (HTTP ${http_code})"
+            echo "Failed to fetch releases from GitHub API (HTTP ${http_code})" >&2
+            return 1
         fi
     fi
     
     # Check if the response contains a tag_name field
     if ! echo "$json_body" | grep -q '"tag_name":'; then
-        error "No releases found for repository ${REPO_OWNER}/${REPO_NAME}. Please create a release first."
+        echo "No releases found for repository ${REPO_OWNER}/${REPO_NAME}. Please create a release first." >&2
+        return 1
     fi
     
     local latest_tag=$(echo "$json_body" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
     
     if [[ -z "$latest_tag" ]]; then
-        error "Failed to parse latest release tag from GitHub API response"
+        echo "Failed to parse latest release tag from GitHub API response" >&2
+        return 1
     fi
     
     echo "$latest_tag"
@@ -194,7 +198,10 @@ main() {
     check_root
     
     # Get latest release
-    local latest_tag=$(get_latest_release)
+    local latest_tag
+    if ! latest_tag=$(get_latest_release 2>&1); then
+        error "$latest_tag"
+    fi
     log "Latest release: ${latest_tag}"
     
     # Download and extract
@@ -202,8 +209,10 @@ main() {
     
     # Cleanup function
     cleanup() {
-        log "Cleaning up temporary files..."
-        rm -rf "$temp_dir"
+        if [[ -n "${temp_dir:-}" ]]; then
+            log "Cleaning up temporary files..."
+            rm -rf "$temp_dir"
+        fi
     }
     trap cleanup EXIT
     
