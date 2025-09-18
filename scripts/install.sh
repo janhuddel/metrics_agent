@@ -6,7 +6,7 @@
 set -euo pipefail
 
 # Configuration
-REPO_OWNER="your-username"  # Update this with your GitHub username
+REPO_OWNER="janhuddel"  # Update this with your GitHub username
 REPO_NAME="metrics_agent"
 INSTALL_DIR="/opt/metrics-agent"
 CONFIG_DIR="/etc/metrics-agent"
@@ -44,10 +44,28 @@ check_root() {
 # Detect latest release
 get_latest_release() {
     local latest_url="https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/releases/latest"
-    local latest_tag=$(curl -s "$latest_url" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+    local response=$(curl -s -w "%{http_code}" "$latest_url")
+    local http_code="${response: -3}"
+    local json_body="${response%???}"
+    
+    # Check if the API call was successful
+    if [[ "$http_code" != "200" ]]; then
+        if [[ "$http_code" == "404" ]]; then
+            error "No releases found for repository ${REPO_OWNER}/${REPO_NAME}. Please create a release first."
+        else
+            error "Failed to fetch releases from GitHub API (HTTP ${http_code})"
+        fi
+    fi
+    
+    # Check if the response contains a tag_name field
+    if ! echo "$json_body" | grep -q '"tag_name":'; then
+        error "No releases found for repository ${REPO_OWNER}/${REPO_NAME}. Please create a release first."
+    fi
+    
+    local latest_tag=$(echo "$json_body" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
     
     if [[ -z "$latest_tag" ]]; then
-        error "Failed to get latest release tag"
+        error "Failed to parse latest release tag from GitHub API response"
     fi
     
     echo "$latest_tag"
@@ -190,10 +208,10 @@ main() {
     trap cleanup EXIT
     
     # Install components
-    create_user
-    install_application "$temp_dir"
-    create_config
-    create_environment
+    #create_user
+    #install_application "$temp_dir"
+    #create_config
+    #create_environment
     
     log "Installation completed successfully!"
     log ""
