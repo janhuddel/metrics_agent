@@ -23,7 +23,7 @@ config :logger, :default_formatter,
   metadata: [:module]
 
 # Module configurations are loaded from TOML files at runtime
-# See config/runtime.exs and MetricsAgent.ConfigLoader
+# See config/runtime.exs and MetricsAgent.Utils.ConfigLoader
 
 # Import environment-specific config files
 import_config "#{config_env()}.exs"

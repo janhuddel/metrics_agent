@@ -5,8 +5,8 @@ import Config
 # External configuration is now handled via TOML files
 
 # Load TOML configuration if available
-if Code.ensure_loaded?(MetricsAgent.ConfigLoader) do
-  case MetricsAgent.ConfigLoader.load_config() do
+if Code.ensure_loaded?(MetricsAgent.Utils.ConfigLoader) do
+  case MetricsAgent.Utils.ConfigLoader.load_config() do
     :ok ->
       :ok
 

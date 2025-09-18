@@ -100,8 +100,8 @@ defmodule MetricsAgentTest do
 
   test "module configuration includes enabled property" do
     # Test that module configurations have the enabled property
-    demo_config = MetricsAgent.ConfigLoader.get_module_config(:demo)
-    tasmota_config = MetricsAgent.ConfigLoader.get_module_config(:tasmota)
+    demo_config = MetricsAgent.Utils.ConfigLoader.get_module_config(:demo)
+    tasmota_config = MetricsAgent.Utils.ConfigLoader.get_module_config(:tasmota)
 
     # Both modules should have the enabled property
     assert Map.has_key?(demo_config, :enabled)

@@ -1,4 +1,4 @@
-defmodule MetricsAgent.ConfigLoader do
+defmodule MetricsAgent.Utils.ConfigLoader do
   @moduledoc """
   Configuration loader for TOML-based configuration files.
 
@@ -61,10 +61,10 @@ defmodule MetricsAgent.ConfigLoader do
 
   ## Examples
 
-      iex> MetricsAgent.ConfigLoader.get_module_config(:demo)
+      iex> MetricsAgent.Utils.ConfigLoader.get_module_config(:demo)
       %{enabled: true, interval: 1000, vendor: "demo"}
 
-      iex> MetricsAgent.ConfigLoader.get_module_config(:tasmota, "device1")
+      iex> MetricsAgent.Utils.ConfigLoader.get_module_config(:tasmota, "device1")
       %{enabled: true, mqtt_host: "192.168.1.100", ...}
   """
   def get_module_config(module_name, device_id \\ nil) do

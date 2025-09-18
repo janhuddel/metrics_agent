@@ -27,7 +27,7 @@ defmodule MetricsAgent.Modules.Tasmota.Tasmota do
   def init(_opts) do
     Logger.info("Starting Tasmota module")
 
-    config = MetricsAgent.ConfigLoader.get_module_config(:tasmota)
+    config = MetricsAgent.Utils.ConfigLoader.get_module_config(:tasmota)
 
     # ConfigLoader automatically applies defaults, so we can use config directly
     mqtt_host = config[:mqtt_host]

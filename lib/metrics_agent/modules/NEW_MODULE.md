@@ -34,7 +34,7 @@ defmodule MetricsAgent.Modules.Prometheus.Prometheus do
   def init(_opts) do
     Logger.info("Starting Prometheus module")
     
-    config = MetricsAgent.ConfigLoader.get_module_config(:prometheus)
+    config = MetricsAgent.Utils.ConfigLoader.get_module_config(:prometheus)
     
     # ConfigLoader automatically applies defaults, so we can use config directly
     interval = config[:interval]
@@ -142,8 +142,8 @@ You can also get device-specific configuration in your module:
 
 ```elixir
 # Get global configuration
-config = MetricsAgent.ConfigLoader.get_module_config(:prometheus)
+config = MetricsAgent.Utils.ConfigLoader.get_module_config(:prometheus)
 
 # Get device-specific configuration (with overrides applied)
-device_config = MetricsAgent.ConfigLoader.get_module_config(:prometheus, "device1")
+device_config = MetricsAgent.Utils.ConfigLoader.get_module_config(:prometheus, "device1")
 ```

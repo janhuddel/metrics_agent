@@ -33,7 +33,7 @@ defmodule MetricsAgent.Modules.ModuleSupervisor do
   defp get_enabled_modules do
     @module_registry
     |> Enum.reduce([], fn {config_key, module_impl}, acc ->
-      config = MetricsAgent.ConfigLoader.get_module_config(config_key)
+      config = MetricsAgent.Utils.ConfigLoader.get_module_config(config_key)
 
       if config[:enabled] do
         Logger.info("#{String.capitalize(to_string(config_key))} module is enabled")

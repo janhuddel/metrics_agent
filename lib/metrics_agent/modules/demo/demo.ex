@@ -25,7 +25,7 @@ defmodule MetricsAgent.Modules.Demo.Demo do
   def init(_opts) do
     Logger.info("Starting demo module")
 
-    config = MetricsAgent.ConfigLoader.get_module_config(:demo)
+    config = MetricsAgent.Utils.ConfigLoader.get_module_config(:demo)
 
     # ConfigLoader automatically applies defaults, so we can use config directly
     interval = config[:interval]
