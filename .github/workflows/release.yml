@@ -28,11 +28,8 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-mix-
           
-    - name: Install dependencies
-      run: mix deps.get
-      
-    - name: Run tests
-      run: mix test
+    - name: Install dependencies and run tests
+      run: make test
 
   release:
     name: Release
@@ -60,22 +57,13 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-mix-
           
-    - name: Install dependencies
-      run: mix deps.get
-      
-    - name: Build release with Burrito
-      run: |
-        # Build with Burrito for better compatibility
-        MIX_ENV=prod mix release --overwrite
-        # Create scripts directory and copy wrapper script to release directory
-        mkdir -p _build/prod/rel/metrics_agent/scripts
-        cp scripts/start.sh _build/prod/rel/metrics_agent/scripts/
-        chmod +x _build/prod/rel/metrics_agent/scripts/start.sh
-        # Create a tarball for easier distribution
-        tar -czf metrics_agent.tar.gz -C _build/prod/rel metrics_agent
+    - name: Build release tarball
+      run: make release-tarball
         
     - name: Generate checksums
       run: |
+        # Move tarball from Makefile output location to current directory
+        mv ./_build/release-tarballs/metrics_agent.tar.gz .
         sha256sum metrics_agent.tar.gz > metrics_agent.tar.gz.sha256
         echo "Generated checksum:"
         cat metrics_agent.tar.gz.sha256
