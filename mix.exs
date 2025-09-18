@@ -4,24 +4,33 @@ defmodule MetricsAgent.MixProject do
   def project do
     [
       app: :metrics_agent,
-      version: "0.1.0",
+      version: version(),
       elixir: "~> 1.17",
       start_permanent: Mix.env() == :prod,
       deps: deps()
-      # releases: [
-      #  metrics_agent: [
-      #    steps: [:assemble, &Burrito.wrap/1],
-      #    burrito: [
-      #      targets: [
-      #        linux: [
-      #          os: :linux,
-      #          cpu: :x86_64
-      #        ]
-      #      ]
-      #    ]
-      #  ]
-      # ]
     ]
+  end
+
+  # Get version from git tag or use -dev suffix if not on a tag
+  defp version do
+    case System.cmd("git", ["describe", "--tags", "--exact-match", "HEAD"],
+           stderr_to_stdout: true
+         ) do
+      {tag, 0} ->
+        # We're on an exact tag, remove the 'v' prefix if present
+        tag |> String.trim() |> String.replace_leading("v", "")
+
+      _ ->
+        # Not on an exact tag, get the latest tag and add -dev
+        case System.cmd("git", ["describe", "--tags", "--abbrev=0"], stderr_to_stdout: true) do
+          {latest_tag, 0} ->
+            latest_tag |> String.trim() |> String.replace_leading("v", "") |> Kernel.<>("-dev")
+
+          _ ->
+            # No tags found, use default version
+            "0.0.0-dev"
+        end
+    end
   end
 
   # Run "mix help compile.app" to learn about applications.
@@ -35,8 +44,6 @@ defmodule MetricsAgent.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      # {:burrito, "~> 1.4"},
-
       # JSON handling
       {:jason, "~> 1.4"},
 
