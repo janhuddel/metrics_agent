@@ -22,11 +22,14 @@ defmodule MetricsAgent.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      # MQTT client
-      {:tortoise, "~> 0.10"},
-
       # JSON handling
-      {:jason, "~> 1.4"}
+      {:jason, "~> 1.4"},
+
+      # MQTT client (https://github.com/emqx/emqtt/issues/289)
+      {:emqtt,
+       git: "https://github.com/emqx/emqtt.git",
+       tag: "1.14.4",
+       system_env: [{"BUILD_WITHOUT_QUIC", "1"}]}
     ]
   end
 end

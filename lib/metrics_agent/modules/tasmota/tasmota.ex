@@ -20,22 +20,32 @@ defmodule MetricsAgent.Modules.Tasmota.Tasmota do
     client_id = config[:client_id] || generate_client_id()
 
     # Start MQTT client
-    {:ok, client} =
-      Tortoise.Connection.start_link(
-        client_id: client_id,
-        server: {Tortoise.Transport.Tcp, host: config[:mqtt_host], port: config[:mqtt_port]},
-        user_name: config[:username] || "",
-        password: config[:password] || "",
-        keep_alive: config[:keep_alive] || 60,
-        will: nil,
-        subscriptions: [
-          {config[:discovery_topic], 1}
-        ],
-        handler: {MetricsAgent.Modules.Tasmota.MessageHandler, [client_id: client_id]}
-      )
+    {:ok, pid} =
+      :emqtt.start_link([
+        # oder 'localhost'
+        {:host, config[:mqtt_host]},
+        {:port, config[:mqtt_port]},
+        {:clientid, client_id},
+        {:username, ""},
+        {:password, ""},
+        {:clean_start, true},
+        {:keepalive, 60}
+      ])
+
+    # Connect to MQTT broker
+    {:ok, _props} = :emqtt.connect(pid)
+
+    # Subscribe to discovery topic
+    :emqtt.subscribe(pid, {config[:discovery_topic], 0})
 
     Logger.info("Tasmota module started with MQTT client: #{client_id}")
-    {:ok, %{client: client}}
+    {:ok, %{pid: pid}}
+  end
+
+  @impl true
+  def handle_info({:publish, publish}, state) do
+    MetricsAgent.Modules.Tasmota.MessageHandler.handle_mqtt_message(publish, state.pid)
+    {:noreply, state}
   end
 
   # Private functions
