@@ -99,10 +99,9 @@ defmodule MetricsAgent.ConfigLoader do
 
   # Check if we're in test environment without using Mix (which isn't available in production)
   defp is_test_environment? do
-    # Check if we're running tests by looking for test-specific files or environment
-    # Check if we're in a test context by looking for test-specific patterns
-    File.exists?("config/config.test.toml") or
-      System.get_env("MIX_ENV") == "test" or
+    # Only consider it a test environment if MIX_ENV is explicitly set to "test"
+    # or if we're running in a test context (like when running mix test)
+    System.get_env("MIX_ENV") == "test" or
       case File.cwd() do
         {:ok, cwd} -> String.contains?(cwd, "test")
         _ -> false

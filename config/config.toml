@@ -4,13 +4,13 @@
 
 # Demo module configuration
 [modules.demo]
-enabled = false
-interval = 1000
+enabled = true
+interval = 5000
 vendor = "demo"
 
 # Tasmota module configuration
 [modules.tasmota]
-enabled = true
+enabled = false
 mqtt_host = "mqtt.intra.rohwer.sh"
 #mqtt_port = 1883
 #discovery_topic = "tasmota/discovery/+/config"
