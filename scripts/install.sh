@@ -130,43 +130,8 @@ install_application() {
 
 # Note: No systemd service needed - metrics_agent runs under Telegraf's inputs.execd
 
-# Create configuration file
-create_config() {
-    log "Creating configuration file..."
-    
-    cat > "$CONFIG_DIR/config.exs" << 'EOF'
-import Config
-
-# Logger configuration - preserve standard_error for production compatibility
-config :logger,
-  level: :info
-
-config :logger, :default_handler,
-  config: [
-    type: :standard_error
-  ]
-
-config :logger, :default_formatter,
-  format: "$date $time [$level] [$metadata] $message\n",
-  metadata: [:module]
-
-# Demo module configuration
-config :metrics_agent, :demo,
-  enabled: true,
-  interval: 1000,
-  vendor: "demo"
-
-# Tasmota module configuration
-config :metrics_agent, :tasmota,
-  enabled: true,
-  mqtt_host: System.get_env("MQTT_HOST", "localhost"),
-  mqtt_port: String.to_integer(System.get_env("MQTT_PORT", "1883")),
-  discovery_topic: System.get_env("DISCOVERY_TOPIC", "tasmota/discovery/+/config")
-EOF
-
-    chown "$SERVICE_USER:$SERVICE_GROUP" "$CONFIG_DIR/config.exs"
-    chmod 644 "$CONFIG_DIR/config.exs"
-}
+# Note: Configuration is now handled via environment variables only
+# No external config files are created - all settings come from /etc/metrics-agent/environment
 
 # Create environment file
 create_environment() {
@@ -225,7 +190,6 @@ main() {
     # Install components
     #create_user
     install_application "$temp_dir"
-    create_config
     create_environment
     
     log "Installation completed successfully!"
