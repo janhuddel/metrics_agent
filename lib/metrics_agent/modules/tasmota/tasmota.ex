@@ -50,12 +50,8 @@ defmodule MetricsAgent.Modules.Tasmota.Tasmota do
 
   # Private functions
   defp generate_client_id do
-    hostname =
-      case :inet.gethostname() do
-        {:ok, hostname} -> List.to_string(hostname)
-        {:error, _} -> "unknown"
-      end
-
-    "#{hostname}-tasmota-#{:rand.uniform(10000)}"
+    {:ok, hostname} = :inet.gethostname()
+    hostname_string = List.to_string(hostname)
+    "#{hostname_string}-tasmota-#{:rand.uniform(10000)}"
   end
 end
