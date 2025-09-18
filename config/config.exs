@@ -8,8 +8,9 @@
 
 import Config
 
+# Logger configuration - preserve standard_error for production compatibility
 config :logger,
-  level: :debug
+  level: if(Mix.env() == :prod, do: :info, else: :debug)
 
 config :logger, :default_handler,
   config: [
@@ -20,11 +21,24 @@ config :logger, :default_formatter,
   format: "$date $time [$level] [$metadata] $message\n",
   metadata: [:module]
 
+# Demo module configuration
 config :metrics_agent, :demo,
+  enabled: false,
   interval: 1000,
   vendor: "demo"
 
+# Tasmota module configuration
 config :metrics_agent, :tasmota,
+  enabled: false,
   mqtt_host: "mqtt.intra.rohwer.sh",
   mqtt_port: 1883,
   discovery_topic: "tasmota/discovery/+/config"
+
+# Production-specific configuration
+if Mix.env() == :prod do
+  # Production config can be overridden by runtime config
+  config :metrics_agent, :tasmota,
+    mqtt_host: System.get_env("MQTT_HOST", "localhost"),
+    mqtt_port: String.to_integer(System.get_env("MQTT_PORT", "1883")),
+    discovery_topic: System.get_env("DISCOVERY_TOPIC", "tasmota/discovery/+/config")
+end

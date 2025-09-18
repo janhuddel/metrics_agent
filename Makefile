@@ -9,7 +9,7 @@ help: ## Show this help message
 deps: ## Install dependencies
 	mix deps.get
 
-test: ## Run tests
+test: deps ## Run tests
 	mix test
 
 run: compile ## Run the application (logs to stderr, line protocol to stdout)
@@ -28,12 +28,18 @@ clean: ## Clean build artifacts
 	mix clean
 	rm -rf _build/
 	rm -rf deps/
+	rm -rf cover/
 
 format: ## Format code
 	mix format
 
-release: ## Create a release
-	mix release
+release: test ## Create a release
+	MIX_ENV=prod mix release
+
+release-tarball: release ## Create a release tarball for distribution
+	mkdir -p ./_build/release-tarballs
+	tar -czf ./_build/release-tarballs/metrics_agent.tar.gz -C _build/prod/rel metrics_agent
+	@echo "Release tarball created: metrics_agent.tar.gz"
 
 install: deps compile ## Install and compile everything
 	@echo "Installation complete!"
