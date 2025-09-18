@@ -88,13 +88,27 @@ defmodule MetricsAgent.ConfigLoader do
   defp find_config_file do
     # In test environment, prefer test-specific config
     paths =
-      if Mix.env() == :test do
+      if is_test_environment?() do
         ["config/config.test.toml" | @config_paths]
       else
         @config_paths
       end
 
     Enum.find(paths, &File.exists?/1)
+  end
+
+  # Check if we're in test environment without using Mix (which isn't available in production)
+  defp is_test_environment? do
+    # Check if we're running tests by looking for test-specific files or environment
+    # Check if we're in a test context by looking for test-specific patterns
+    File.exists?("config/config.test.toml") or
+      System.get_env("MIX_ENV") == "test" or
+      case File.cwd() do
+        {:ok, cwd} -> String.contains?(cwd, "test")
+        _ -> false
+      end
+  rescue
+    _ -> false
   end
 
   defp load_from_file(config_path) do
