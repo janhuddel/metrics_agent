@@ -7,7 +7,7 @@ on:
 
 jobs:
   release:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     permissions:
       contents: write
       pull-requests: read
@@ -19,11 +19,11 @@ jobs:
     - name: Set up Elixir
       uses: erlef/setup-beam@v1
       with:
-        elixir-version: '1.17.0'
-        otp-version: '26.0'
+        elixir-version: '1.17.3'
+        otp-version: '27.0'
         
     - name: Restore dependencies cache
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: deps
         key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
@@ -36,24 +36,65 @@ jobs:
     - name: Run tests
       run: mix test
       
-    - name: Build release
+    - name: Build release with Burrito
       run: |
-        # Build with compatibility flags
+        # Build with Burrito for better compatibility
         MIX_ENV=prod mix release --overwrite
         # Create a tarball for easier distribution
         tar -czf metrics_agent.tar.gz -C _build/prod/rel metrics_agent
+        
+    - name: Generate checksums
+      run: |
+        sha256sum metrics_agent.tar.gz > metrics_agent.tar.gz.sha256
+        echo "Generated checksum:"
+        cat metrics_agent.tar.gz.sha256
         
     - name: Extract version from tag
       id: version
       run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
       
     - name: Create Release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       with:
         tag_name: ${{ steps.version.outputs.VERSION }}
         name: Release ${{ steps.version.outputs.VERSION }}
         files: |
           metrics_agent.tar.gz
+          metrics_agent.tar.gz.sha256
         generate_release_notes: true
+        body: |
+          ## Installation
+          
+          Download and install the latest version:
+          ```bash
+          curl -fsSL https://raw.githubusercontent.com/janhuddel/metrics_agent/main/scripts/install.sh | sudo bash
+          ```
+          
+          ## Manual Installation
+          
+          1. Download the release:
+          ```bash
+          wget https://github.com/janhuddel/metrics_agent/releases/download/${{ steps.version.outputs.VERSION }}/metrics_agent.tar.gz
+          ```
+          
+          2. Verify checksum:
+          ```bash
+          wget https://github.com/janhuddel/metrics_agent/releases/download/${{ steps.version.outputs.VERSION }}/metrics_agent.tar.gz.sha256
+          sha256sum -c metrics_agent.tar.gz.sha256
+          ```
+          
+          3. Extract and install:
+          ```bash
+          tar -xzf metrics_agent.tar.gz
+          sudo mkdir -p /opt/metrics-agent
+          sudo cp -r metrics_agent/* /opt/metrics-agent/
+          sudo chown -R telegraf:telegraf /opt/metrics-agent
+          ```
+          
+          ## System Requirements
+          
+          - Linux x86_64 (tested on Debian 12, Ubuntu 22.04+)
+          - Telegraf with inputs.execd plugin
+          - MQTT broker (for Tasmota integration)
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
