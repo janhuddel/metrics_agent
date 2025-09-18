@@ -6,11 +6,9 @@ on:
       - 'v*'
 
 jobs:
-  release:
+  test:
+    name: Test
     runs-on: ubuntu-22.04
-    permissions:
-      contents: write
-      pull-requests: read
     
     steps:
     - name: Checkout code
@@ -35,6 +33,35 @@ jobs:
       
     - name: Run tests
       run: mix test
+
+  release:
+    name: Release
+    runs-on: ubuntu-22.04
+    needs: test
+    permissions:
+      contents: write
+      pull-requests: read
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Elixir
+      uses: erlef/setup-beam@v1
+      with:
+        elixir-version: '1.17.3'
+        otp-version: '27.0'
+        
+    - name: Restore dependencies cache
+      uses: actions/cache@v4
+      with:
+        path: deps
+        key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-mix-
+          
+    - name: Install dependencies
+      run: mix deps.get
       
     - name: Build release with Burrito
       run: |
