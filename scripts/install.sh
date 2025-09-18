@@ -81,10 +81,10 @@ download_release() {
     local download_url="https://github.com/${REPO_OWNER}/${REPO_NAME}/releases/download/${tag}/metrics_agent.tar.gz"
     local temp_dir=$(mktemp -d)
     
-    log "Downloading release ${tag}..."
+    log "Downloading release ${tag}..." >&2
     curl -L -o "${temp_dir}/metrics_agent.tar.gz" "$download_url" || error "Failed to download release"
     
-    log "Extracting release..."
+    log "Extracting release..." >&2
     tar -xzf "${temp_dir}/metrics_agent.tar.gz" -C "$temp_dir" || error "Failed to extract release"
     
     echo "$temp_dir"
@@ -218,9 +218,9 @@ main() {
     
     # Install components
     #create_user
-    #install_application "$temp_dir"
-    #create_config
-    #create_environment
+    install_application "$temp_dir"
+    create_config
+    create_environment
     
     log "Installation completed successfully!"
     log ""
