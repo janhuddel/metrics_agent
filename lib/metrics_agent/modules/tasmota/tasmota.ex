@@ -10,20 +10,43 @@ defmodule MetricsAgent.Modules.Tasmota.Tasmota do
     GenServer.start_link(__MODULE__, [], name: __MODULE__)
   end
 
+  @doc """
+  Returns the default configuration for the Tasmota module.
+  """
+  def default_config do
+    %{
+      enabled: false,
+      mqtt_host: "localhost",
+      mqtt_port: 1883,
+      discovery_topic: "tasmota/discovery/+/config",
+      client_id: ""
+    }
+  end
+
   @impl true
   def init(_opts) do
     Logger.info("Starting Tasmota module")
 
-    config = Application.get_env(:metrics_agent, :tasmota)
+    config = MetricsAgent.ConfigLoader.get_module_config(:tasmota)
 
-    # Generate client ID if not provided
-    client_id = config[:client_id] || generate_client_id()
+    # ConfigLoader automatically applies defaults, so we can use config directly
+    mqtt_host = config[:mqtt_host]
+    mqtt_port = config[:mqtt_port]
+    discovery_topic = config[:discovery_topic]
+
+    # Generate client ID if not provided (empty string means auto-generate)
+    client_id =
+      if config[:client_id] == "" or is_nil(config[:client_id]) do
+        generate_client_id()
+      else
+        config[:client_id]
+      end
 
     # Start MQTT client
     {:ok, pid} =
       :emqtt.start_link([
-        {:host, config[:mqtt_host]},
-        {:port, config[:mqtt_port]},
+        {:host, mqtt_host},
+        {:port, mqtt_port},
         {:clientid, client_id},
         {:username, ""},
         {:password, ""},
@@ -32,11 +55,11 @@ defmodule MetricsAgent.Modules.Tasmota.Tasmota do
       ])
 
     # Connect to MQTT broker
-    Logger.info("Connecting to MQTT broker: #{config[:mqtt_host]}:#{config[:mqtt_port]}")
+    Logger.info("Connecting to MQTT broker: #{mqtt_host}:#{mqtt_port}")
     {:ok, _props} = :emqtt.connect(pid)
 
     # Subscribe to discovery topic
-    :emqtt.subscribe(pid, {config[:discovery_topic], 0})
+    :emqtt.subscribe(pid, {discovery_topic, 0})
 
     Logger.info("Tasmota module started with MQTT client: #{client_id}")
     {:ok, %{pid: pid}}

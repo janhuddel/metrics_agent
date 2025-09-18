@@ -22,18 +22,8 @@ config :logger, :default_formatter,
   format: "$date $time [$level] [$metadata] $message\n",
   metadata: [:module]
 
-# Demo module configuration - defaults
-config :metrics_agent, :demo,
-  enabled: false,
-  interval: 1000,
-  vendor: "demo"
-
-# Tasmota module configuration - defaults
-config :metrics_agent, :tasmota,
-  enabled: false,
-  mqtt_host: "localhost",
-  mqtt_port: 1883,
-  discovery_topic: "tasmota/discovery/+/config"
+# Module configurations are loaded from TOML files at runtime
+# See config/runtime.exs and MetricsAgent.ConfigLoader
 
 # Import environment-specific config files
 import_config "#{config_env()}.exs"

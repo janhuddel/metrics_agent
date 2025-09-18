@@ -1,0 +1,41 @@
+# Metrics Agent Configuration
+# This is an example configuration file showing the TOML-based configuration system.
+# Copy this file to /etc/metrics-agent/config.toml and customize as needed.
+
+# Demo module configuration
+[modules.demo]
+enabled = true
+interval = 1000
+vendor = "demo"
+
+# Tasmota module configuration
+[modules.tasmota]
+enabled = true
+mqtt_host = "localhost"
+mqtt_port = 1883
+discovery_topic = "tasmota/discovery/+/config"
+client_id = ""  # Leave empty for auto-generation
+
+# Device-specific overrides for Tasmota module
+# These settings will override the global module settings for specific devices
+[modules.tasmota.devices."device1"]
+mqtt_host = "192.168.1.100"
+discovery_topic = "custom/device1/discovery/+/config"
+custom_settings = { timeout = 30, retry_count = 3 }
+
+[modules.tasmota.devices."device2"]
+mqtt_host = "192.168.1.101"
+mqtt_port = 8883
+discovery_topic = "secure/device2/discovery/+/config"
+custom_settings = { timeout = 60, retry_count = 5, ssl = true }
+
+# Example of a future module configuration
+# [modules.prometheus]
+# enabled = false
+# scrape_interval = 15
+# targets = ["localhost:9090", "localhost:9091"]
+# 
+# # Device-specific overrides for Prometheus module
+# [modules.prometheus.devices."server1"]
+# targets = ["192.168.1.10:9090"]
+# scrape_interval = 30

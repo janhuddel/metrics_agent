@@ -146,20 +146,22 @@ systemd → telegraf (inputs.execd) → metrics_agent
 2. **Telegraf** runs the metrics agent via `inputs.execd` (no separate systemd service needed for metrics_agent)
 3. **metrics_agent** outputs metrics to stdout (consumed by Telegraf)
 
-### Configure MQTT Settings
+### Configure Module Settings
 
-Edit the environment configuration:
+Edit the TOML configuration:
 
 ```bash
-sudo nano /etc/metrics-agent/environment
+sudo nano /etc/metrics-agent/config.toml
 ```
 
-Update the MQTT settings:
+Update the module settings:
 
-```bash
-MQTT_HOST=your-mqtt-broker.com
-MQTT_PORT=1883
-DISCOVERY_TOPIC=tasmota/discovery/+/config
+```toml
+[modules.tasmota]
+enabled = true
+mqtt_host = "your-mqtt-broker.com"
+mqtt_port = 1883
+discovery_topic = "tasmota/discovery/+/config"
 ```
 
 ### Start Telegraf
@@ -171,16 +173,9 @@ sudo systemctl restart telegraf
 
 ## Configuration
 
-### Environment Variables
+### TOML Configuration
 
-The agent can be configured using environment variables:
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `MQTT_HOST` | `localhost` | MQTT broker hostname |
-| `MQTT_PORT` | `1883` | MQTT broker port |
-| `DISCOVERY_TOPIC` | `tasmota/discovery/+/config` | MQTT discovery topic |
-| `MIX_ENV` | `prod` | Elixir environment |
+The agent uses TOML files for configuration, providing a structured and scalable approach to managing module settings and device-specific overrides.
 
 ### File Locations (Linux FHS)
 
@@ -195,39 +190,64 @@ Following the Linux Filesystem Hierarchy Standard:
 
 ### Configuration Files
 
-- **Application config**: `/etc/metrics-agent/config.exs`
-- **Environment variables**: `/etc/metrics-agent/environment`
+- **Main configuration**: `/etc/metrics-agent/config.toml`
+- **Example configuration**: `config/config.toml.example`
 
-### Environment Configuration
+### TOML Configuration Structure
 
-`/etc/metrics-agent/environment`:
-```bash
-# MQTT Configuration
-MQTT_HOST=localhost
-MQTT_PORT=1883
-DISCOVERY_TOPIC=tasmota/discovery/+/config
+The configuration file supports a hierarchical structure with module-specific settings and device overrides:
 
-# Application Environment
-MIX_ENV=prod
+```toml
+# Demo module configuration
+[modules.demo]
+enabled = true
+interval = 1000
+vendor = "demo"
+
+# Tasmota module configuration
+[modules.tasmota]
+enabled = true
+mqtt_host = "localhost"
+mqtt_port = 1883
+discovery_topic = "tasmota/discovery/+/config"
+client_id = ""  # Leave empty for auto-generation
+
+# Device-specific overrides for Tasmota module
+[modules.tasmota.devices."device1"]
+mqtt_host = "192.168.1.100"
+discovery_topic = "custom/device1/discovery/+/config"
+custom_settings = { timeout = 30, retry_count = 3 }
+
+[modules.tasmota.devices."device2"]
+mqtt_host = "192.168.1.101"
+mqtt_port = 8883
+discovery_topic = "secure/device2/discovery/+/config"
+custom_settings = { timeout = 60, retry_count = 5, ssl = true }
 ```
 
-### Application Configuration
+### Configuration Features
 
-`/etc/metrics-agent/config.exs`:
-```elixir
-import Config
+- **Module-based configuration**: Each module has its own configuration section
+- **Device overrides**: Override global module settings for specific devices
+- **Hierarchical structure**: Clean separation of concerns
+- **Type safety**: TOML provides better type handling than environment variables
+- **Extensibility**: Easy to add new modules and configuration options
 
-# Logger configuration - preserve standard_error for production compatibility
-config :logger,
-  level: :info
+### Module Configuration
 
-config :logger, :default_handler,
-  config: [
-    type: :standard_error
-  ]
+| Module | Configuration Section | Key Settings |
+|--------|----------------------|--------------|
+| **Demo** | `[modules.demo]` | `enabled`, `interval`, `vendor` |
+| **Tasmota** | `[modules.tasmota]` | `enabled`, `mqtt_host`, `mqtt_port`, `discovery_topic` |
 
-# ... (automatically created by install script)
-```
+### Device Overrides
+
+Device-specific overrides are defined under `[modules.<module>.devices."<device_id>"]` and will override the global module settings for that specific device. This allows for:
+
+- Different MQTT brokers per device
+- Custom discovery topics
+- Device-specific timeouts and retry settings
+- SSL/TLS configurations per device
 
 ## Monitoring and Maintenance
 

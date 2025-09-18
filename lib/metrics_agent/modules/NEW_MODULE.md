@@ -19,13 +19,26 @@ defmodule MetricsAgent.Modules.Prometheus.Prometheus do
     GenServer.start_link(__MODULE__, [], name: __MODULE__)
   end
 
+  @doc """
+  Returns the default configuration for the Prometheus module.
+  """
+  def default_config do
+    %{
+      enabled: false,
+      interval: 30000,
+      endpoint: "http://localhost:9090/metrics"
+    }
+  end
+
   @impl true
   def init(_opts) do
     Logger.info("Starting Prometheus module")
     
-    config = Application.get_env(:metrics_agent, :prometheus)
-    interval = config[:interval] || 30000
-    endpoint = config[:endpoint] || "http://localhost:9090/metrics"
+    config = MetricsAgent.ConfigLoader.get_module_config(:prometheus)
+    
+    # ConfigLoader automatically applies defaults, so we can use config directly
+    interval = config[:interval]
+    endpoint = config[:endpoint]
     
     # Schedule first metric collection
     Process.send_after(self(), :collect_metrics, interval)
@@ -48,15 +61,23 @@ end
 
 ## Step 2: Add Configuration
 
-Add configuration to `config/config.exs`:
+The module defines its own defaults via the `default_config/0` function. 
+You only need to add runtime configuration to `/etc/metrics-agent/config.toml`:
 
-```elixir
-# Prometheus module configuration
-config :metrics_agent, :prometheus,
-  enabled: true,
-  interval: 30000,
-  endpoint: "http://localhost:9090/metrics"
+```toml
+# /etc/metrics-agent/config.toml - Runtime configuration
+[modules.prometheus]
+enabled = true
+interval = 30000
+endpoint = "http://localhost:9090/metrics"
+
+# Device-specific overrides
+[modules.prometheus.devices."server1"]
+endpoint = "http://192.168.1.10:9090/metrics"
+interval = 15000
 ```
+
+**Note**: The `default_config/0` function provides the default values, so you only need to specify values you want to override in the TOML file.
 
 ## Step 3: Register the Module
 
@@ -91,18 +112,38 @@ The generic `get_enabled_modules/0` function will automatically:
 
 ## Usage Examples
 
-```elixir
+### TOML Configuration
+
+```toml
 # Enable the new module
-config :metrics_agent, :prometheus,
-  enabled: true,
-  interval: 30000,
-  endpoint: "http://localhost:9090/metrics"
+[modules.prometheus]
+enabled = true
+interval = 30000
+endpoint = "http://localhost:9090/metrics"
 
 # Disable the module
-config :metrics_agent, :prometheus,
-  enabled: false,
-  interval: 30000,
-  endpoint: "http://localhost:9090/metrics"
+[modules.prometheus]
+enabled = false
+interval = 30000
+endpoint = "http://localhost:9090/metrics"
+
+# Device-specific configuration
+[modules.prometheus.devices."production-server"]
+enabled = true
+endpoint = "http://prod-server:9090/metrics"
+interval = 60000
 ```
 
 The module will be automatically started or skipped based on the `enabled` setting!
+
+### Device-Specific Configuration
+
+You can also get device-specific configuration in your module:
+
+```elixir
+# Get global configuration
+config = MetricsAgent.ConfigLoader.get_module_config(:prometheus)
+
+# Get device-specific configuration (with overrides applied)
+device_config = MetricsAgent.ConfigLoader.get_module_config(:prometheus, "device1")
+```

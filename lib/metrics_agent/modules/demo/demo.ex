@@ -10,13 +10,26 @@ defmodule MetricsAgent.Modules.Demo.Demo do
     GenServer.start_link(__MODULE__, [], name: __MODULE__)
   end
 
+  @doc """
+  Returns the default configuration for the Demo module.
+  """
+  def default_config do
+    %{
+      enabled: false,
+      interval: 1000,
+      vendor: "demo"
+    }
+  end
+
   @impl true
   def init(_opts) do
     Logger.info("Starting demo module")
 
-    config = Application.get_env(:metrics_agent, :demo)
-    interval = config[:interval] || 5000
-    vendor = config[:vendor] || "unknown"
+    config = MetricsAgent.ConfigLoader.get_module_config(:demo)
+
+    # ConfigLoader automatically applies defaults, so we can use config directly
+    interval = config[:interval]
+    vendor = config[:vendor]
 
     # Schedule first metric collection
     Process.send_after(self(), :collect_metrics, interval)

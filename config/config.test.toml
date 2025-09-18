@@ -1,0 +1,14 @@
+# Test configuration - Tasmota disabled to avoid MQTT connection issues
+
+# Demo module configuration
+[modules.demo]
+enabled = true
+interval = 100
+vendor = "test-demo"
+
+# Tasmota module configuration - disabled for tests
+[modules.tasmota]
+enabled = false
+mqtt_host = "localhost"
+mqtt_port = 1883
+discovery_topic = "tasmota/discovery/+/config"

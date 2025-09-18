@@ -1,7 +1,7 @@
 #!/bin/bash
-# Wrapper script for metrics_agent that loads environment configuration
-# This script automatically loads environment variables from /etc/metrics-agent/environment
-# and starts the metrics_agent application.
+# Wrapper script for metrics_agent that uses TOML configuration
+# This script starts the metrics_agent application which loads configuration
+# from /etc/metrics-agent/config.toml automatically.
 
 set -euo pipefail
 
@@ -16,17 +16,14 @@ if [ ! -f "$BINARY_PATH" ]; then
     exit 1
 fi
 
-# Load environment file if it exists
-if [ -f "/etc/metrics-agent/environment" ]; then
-    echo "Loading environment from /etc/metrics-agent/environment" >&2
-    set -a  # Automatically export all variables
-    source /etc/metrics-agent/environment
-    set +a  # Turn off automatic export
+# Check if TOML configuration file exists
+if [ -f "/etc/metrics-agent/config.toml" ]; then
+    echo "Configuration will be loaded from /etc/metrics-agent/config.toml" >&2
 else
-    echo "Warning: /etc/metrics-agent/environment not found, using defaults" >&2
+    echo "Warning: /etc/metrics-agent/config.toml not found, using defaults" >&2
 fi
 
-# Set default MIX_ENV if not set
+# Set default MIX_ENV
 export MIX_ENV="${MIX_ENV:-prod}"
 
 # Start the application

@@ -47,6 +47,9 @@ defmodule MetricsAgent.MixProject do
       # JSON handling
       {:jason, "~> 1.4"},
 
+      # TOML configuration parsing
+      {:toml, "~> 0.6"},
+
       # MQTT client (https://github.com/emqx/emqtt/issues/289)
       {:emqtt,
        git: "https://github.com/emqx/emqtt.git",

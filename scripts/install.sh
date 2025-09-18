@@ -130,34 +130,40 @@ install_application() {
 
 # Note: No systemd service needed - metrics_agent runs under Telegraf's inputs.execd
 
-# Note: Configuration is now handled via environment variables only
-# No external config files are created - all settings come from /etc/metrics-agent/environment
+# Note: Configuration is now handled via TOML files
+# The main configuration file is /etc/metrics-agent/config.toml
 
-# Create environment file
-create_environment() {
-    log "Creating environment file..."
+# Create TOML configuration file
+create_config() {
+    log "Creating TOML configuration file..."
     
-    cat > "/etc/metrics-agent/environment" << 'EOF'
-# Metrics Agent Environment Configuration
+    cat > "/etc/metrics-agent/config.toml" << 'EOF'
+# Metrics Agent Configuration
 # Edit these values according to your setup
 
 # Demo module configuration
-DEMO_ENABLED=true
-DEMO_INTERVAL=1000
-DEMO_VENDOR=demo
+[modules.demo]
+enabled = true
+interval = 1000
+vendor = "demo"
 
 # Tasmota module configuration
-TASMOTA_ENABLED=true
-MQTT_HOST=localhost
-MQTT_PORT=1883
-DISCOVERY_TOPIC=tasmota/discovery/+/config
+[modules.tasmota]
+enabled = true
+mqtt_host = "localhost"
+mqtt_port = 1883
+discovery_topic = "tasmota/discovery/+/config"
+client_id = ""  # Leave empty for auto-generation
 
-# Application Environment
-MIX_ENV=prod
+# Device-specific overrides for Tasmota module
+# Uncomment and customize as needed:
+# [modules.tasmota.devices."device1"]
+# mqtt_host = "192.168.1.100"
+# discovery_topic = "custom/device1/discovery/+/config"
 EOF
 
-    chown "$SERVICE_USER:$SERVICE_GROUP" "/etc/metrics-agent/environment"
-    chmod 644 "/etc/metrics-agent/environment"
+    chown "$SERVICE_USER:$SERVICE_GROUP" "/etc/metrics-agent/config.toml"
+    chmod 644 "/etc/metrics-agent/config.toml"
 }
 
 # Note: Environment file is used by Telegraf's inputs.execd, not a separate systemd service
@@ -190,12 +196,12 @@ main() {
     # Install components
     #create_user
     install_application "$temp_dir"
-    create_environment
+    create_config
     
     log "Installation completed successfully!"
     log ""
     log "Next steps:"
-    log "1. Edit /etc/metrics-agent/environment to configure MQTT settings"
+    log "1. Edit /etc/metrics-agent/config.toml to configure module settings"
     log "2. Add the Telegraf configuration to your telegraf.conf:"
     log ""
     log "[[inputs.execd]]"

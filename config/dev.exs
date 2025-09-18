@@ -4,17 +4,8 @@ import Config
 
 # Logger configuration - more verbose in development
 config :logger,
-  level: :debug
+  level: :info
 
-# Demo module configuration - enabled for development testing
-config :metrics_agent, :demo,
-  enabled: true,
-  interval: 1000,
-  vendor: "dev-demo"
-
-# Tasmota module configuration - disabled by default in dev
-config :metrics_agent, :tasmota,
-  enabled: false,
-  mqtt_host: "localhost",
-  mqtt_port: 1883,
-  discovery_topic: "tasmota/discovery/+/config"
+# Module configurations are now loaded from TOML files via ConfigLoader
+# Default configurations are defined in config/config.exs
+# Runtime configurations are loaded from TOML files in config/runtime.exs
