@@ -176,7 +176,13 @@ create_environment() {
 # Metrics Agent Environment Configuration
 # Edit these values according to your setup
 
-# MQTT Configuration
+# Demo module configuration
+DEMO_ENABLED=true
+DEMO_INTERVAL=1000
+DEMO_VENDOR=demo
+
+# Tasmota module configuration
+TASMOTA_ENABLED=true
 MQTT_HOST=localhost
 MQTT_PORT=1883
 DISCOVERY_TOPIC=tasmota/discovery/+/config
@@ -229,7 +235,7 @@ main() {
     log "2. Add the Telegraf configuration to your telegraf.conf:"
     log ""
     log "[[inputs.execd]]"
-    log "  command = [\"/opt/metrics-agent/bin/metrics_agent\", \"start\"]"
+    log "  command = [\"/opt/metrics-agent/scripts/start.sh\"]"
     log "  signal = \"STDIN\""
     log "  restart_delay = \"10s\""
     log "  data_format = \"influx\""

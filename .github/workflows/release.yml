@@ -40,6 +40,10 @@ jobs:
       run: |
         # Build with Burrito for better compatibility
         MIX_ENV=prod mix release --overwrite
+        # Create scripts directory and copy wrapper script to release directory
+        mkdir -p _build/prod/rel/metrics_agent/scripts
+        cp scripts/start.sh _build/prod/rel/metrics_agent/scripts/
+        chmod +x _build/prod/rel/metrics_agent/scripts/start.sh
         # Create a tarball for easier distribution
         tar -czf metrics_agent.tar.gz -C _build/prod/rel metrics_agent
         
@@ -89,6 +93,15 @@ jobs:
           sudo mkdir -p /opt/metrics-agent
           sudo cp -r metrics_agent/* /opt/metrics-agent/
           sudo chown -R telegraf:telegraf /opt/metrics-agent
+          ```
+          
+          4. Configure Telegraf to use the wrapper script:
+          ```toml
+          [[inputs.execd]]
+            command = ["/opt/metrics-agent/scripts/start.sh"]
+            signal = "STDIN"
+            restart_delay = "10s"
+            data_format = "influx"
           ```
           
           ## System Requirements

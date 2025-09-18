@@ -22,7 +22,6 @@ defmodule MetricsAgent.Modules.Tasmota.Tasmota do
     # Start MQTT client
     {:ok, pid} =
       :emqtt.start_link([
-        # oder 'localhost'
         {:host, config[:mqtt_host]},
         {:port, config[:mqtt_port]},
         {:clientid, client_id},
@@ -33,6 +32,7 @@ defmodule MetricsAgent.Modules.Tasmota.Tasmota do
       ])
 
     # Connect to MQTT broker
+    Logger.info("Connecting to MQTT broker: #{config[:mqtt_host]}:#{config[:mqtt_port]}")
     {:ok, _props} = :emqtt.connect(pid)
 
     # Subscribe to discovery topic
